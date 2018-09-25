@@ -1,11 +1,15 @@
 from flask import Flask, render_template, request
 from random import choice
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 app = Flask(__name__)
 
 frequency = 10
 duty_cycle = 20
+pins = [5, 15, 11]
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(pins, GPIO.OUT)
 
 @app.route('/')
 def index_page():
@@ -35,21 +39,23 @@ def control_page(pin=0):
   off_color = 'black'
   on_color = 'yellow'
   colors = [off_color]*3
-  pins = [5, 7, 11]
+  
+  pin = int(pin)
+  if pin in pins:
+    GPIO.output(pin, not GPIO.input(pin))
+    print("Turning on pin", pin)
+    
+  for i in range(len(pins)):
+    if GPIO.input(pins[i]):
+      colors[i] = on_color
+      
+  print (colors)
   data = {
     'color_led1' : colors[0],
     'color_led2' : colors[1],
     'color_led3' : colors[2],
   }
 
-  for i in range(len(pins)):
-    if GPIO.input(pins[i]):
-      colors[i] = on_color
-
-  if pin in pins:
-    GPIO.output(pin, not GPIO.input(pin))
-
-  print("Turning on pin", pin)
   return render_template('control.html', **data)
 
 @app.route("/<changePin>/<action>")
