@@ -46,6 +46,9 @@ def control_page(pin=0):
     if GPIO.input(pins[i]):
       colors[i] = on_color
 
+  if pin in pins:
+    GPIO.output(pin, not GPIO.input(pin))
+
   print("Turning on pin", pin)
   return render_template('control.html', **data)
 
